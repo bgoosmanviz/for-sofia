@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Video Sync</title>
     <style>
       body {
@@ -12,9 +12,66 @@
     </style>
   </head>
   <body>
-    Test
+    <div id="plain"></div>
+    <div id="subs"></div>
+    <div id="controls">
+      <button id="switchBtn">Switch</button>
+    </div>
+    <div id="log"></div>
+    <script src="https://player.vimeo.com/api/player.js"></script>
     <script>
-      console.log('test')
+      const plainPlayer = new Vimeo.Player("plain", {
+        width: 640,
+        loop: false,
+        url: 'https://vimeo.com/793513617/2382985359?h',
+      });
+
+      const subsPlayer = new Vimeo.Player("subs", {
+        width: 640,
+        loop: false,
+        url: 'https://vimeo.com/793514186/aca265cf48?h'
+      });
+
+      function log(msg) {
+        const log = document.getElementById("log");
+        log.innerHTML = msg + "<br>" + log.innerHTML;
+      }
+
+      const plain = {
+        player: plainPlayer,
+        container: document.getElementById("plain"),
+      }
+      const subs = {
+        player: subsPlayer,
+        container: document.getElementById("subs"),
+      };
+      let current = plain;
+      let other = subs;
+
+      other.container.style.display = "none";
+      document.getElementById('switchBtn').addEventListener("click", async () => {
+        log("switch");
+        console.log(current, other)
+        current.player.pause();
+        current.player.setVolume(0);
+        current.container.style.display = "none";
+        other.container.style.display = "block";
+        const time = await current.player.getCurrentTime();
+        const otherTime = await other.player.getCurrentTime();
+        console.log('current time', time)
+        console.log('other time', otherTime)
+        if (time != otherTime) {
+          log("seeking " + other.container.id + " to " + time);
+          await other.player.setCurrentTime(time);
+        }
+        other.player.play();
+        other.player.setVolume(1);
+        let tmp = current;
+        current = other;
+        other = tmp;
+        console.log(current, other)
+        log("switched to " + current.container.id)
+      });
     </script>
   </body>
 </html>
