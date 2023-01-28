@@ -36,6 +36,7 @@
         const log = document.getElementById("log");
         log.innerHTML = msg + "<br>" + log.innerHTML;
       }
+      const getLogger = (event) => () => log(event)
 
       const plain = {
         player: plainPlayer,
@@ -48,9 +49,14 @@
       let current = plain;
       let other = subs;
 
+      plainPlayer.on('play', getLogger('play plain'))
+      plainPlayer.on('pause', getLogger('pause plain'))
+      subsPlayer.on('play', getLogger('play subs'))
+      subsPlayer.on('pause', getLogger('pause subs'))
+
       other.container.style.display = "none";
       document.getElementById('switchBtn').addEventListener("click", async () => {
-        log("switch");
+        log("switching to " + other.container.id);
         console.log(current, other)
         current.player.pause();
         current.player.setVolume(0);
@@ -70,7 +76,6 @@
         current = other;
         other = tmp;
         console.log(current, other)
-        log("switched to " + current.container.id)
       });
     </script>
   </body>
